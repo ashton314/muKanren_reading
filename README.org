@@ -1,0 +1,96 @@
+#+title: Notes on μKanren
+#+author: Ashton Wiersdorf
+#+date: 2022-05-21
+
+* Synopsis
+
+I wanted to understand how [[http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf][μKanren]] works. This is an annotated journey through implementing the code from that paper.
+
+* Description
+
+μKanren is a very small implementation in the Kanren family: essentially these are little embedded Prolog implementations. μKanren is particularly interesting because its implementation is less than 40 lines of Scheme code, and makes no use of exotic language features. Indeed, if your language has closures, you can make yourself a μKanren.
+
+* Implementing the Core
+
+** Basic types
+
+#+begin_src
+  state :: subst × fresh_var_counter
+
+  subst :: assoc list mapping variable → variable | value
+
+  goal :: state → state*
+#+end_src
+
+Goals take a state and return a stream (lazy) of zero or more new states.
+
+A state tells us a variable substitution that satisfies the constrains the goals created.
+
+** The ~walk~ function
+
+This takes a variable and a substitution list, and it will walk through the substitution list until it finds the ultimate reference of the variable given. Since variables can map to other variables in the substitution list (see the [[Basic types]] section) then ~walk~ traverses those transitive dependencies until it can't any more.
+
+It /can/ return another variable; if the last thing that one variable points to is another variable that is /not/ present at the beginning of the list, then returning that variable is valid. This is important for the [[Implementing ~unify~][unify]] function.
+
+** Implementing ~unify~
+
+The [[file:kanren.rkt::define (unify u v subst][unify]] function take two /things/, ~u~ and ~v~, and tries to make them line up according to the substitution that you give as well.
+
+#+begin_src racket
+  (unify '(1 2 3) '(2 3 4) '())
+  #f
+
+  (unify '(1 2 3) '(1 2 3) '())
+  '()
+
+  (unify '(1 2 3) '(1 2 3) '(yay))
+  '(yay)
+
+  (unify (list 1 2 3) (list 1 (var 0) 3) '())
+  (list (cons (var 0) 2))
+
+  (unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) 4)))
+  #f
+#+end_src
+
+This example illustrates how the ~walk~ function drills down:
+
+#+begin_src racket
+  (walk (var 0) `((,(var 0) . ,(var 1)) (,(var 1) . ,(var 2))))
+  (var 2)
+
+  (unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) . ,(var 1)) (,(var 1) . 2)))
+  (list (cons (var 0) (var 1)) (cons (var 1) 2))
+#+end_src
+
+If we wanted to be able to unify more than just lists (e.g. rich structures) we would teach μKanren here in the ~cond~ how to walk those richer structures.
+
+Successful unification returns the substitution list that made the two things unify. This is different from the passed-in substitution list when a variable is found to point to another variable.
+
+** Implementing ~call/fresh~
+
+The implementation of [[file:kanren.rkt::define (call/fresh fn][call/fresh]] depends on the structure of the state.
+
+* Extensions
+
+TODO
+
+* Modifications
+
+** Variable representation
+
+I deviated from the paper's implementation of variables and wrote them as structs instead of vectors. I think further changes could be made (e.g. not having to keep around a number in the state to generate fresh variable names but these might rely on some more language-specific features. (E.g. generating fresh strings/symbols.)
+
+* Author
+
+I hope is /very clear/ that /I/ did /not/ write the μKanren paper. That would be Daniel P. Friedman and Jason Hemann. I merely wrote up this annotation.
+
+Ashton Wiersdorf <ashton.wiersdorf@pobox.com>
+
+* Further reading
+
+Be sure to read [[http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf][the actual paper]] which is freely available.
+
+Other fun links:
+
+ - [[https://aphyr.com/posts/354-unifying-the-technical-interview][Unifying the Technical Interview]]
