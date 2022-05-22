@@ -73,36 +73,33 @@
 
 (define (disj goal1 goal2)
   (λ (subst/counter)
+    ;; add the results of two streams of states
     (mplus (goal1 subst/counter)
            (goal2 subst/counter))))
 
 (define (conj goal1 goal2)
   (λ (subst/counter)
+    ;; thread stream of states from running one goal through another
     (bind (goal1 subst/counter)
           goal2)))
 
+;; mplus: like zip-list but for streams (which may be lazy)
 (define (mplus stream1 stream2)
   (cond
     [(null? stream1) stream2]
-    ;; handle the case where stream1 is a lazy stream;
-    ;; note how we flip the order of the streams so we interleave them
+    ;; handle the case where stream1 is a lazy stream; note how we
+    ;; flip the order of the streams so we interleave them
     [(procedure? stream1) (λ () (mplus stream2 (stream1)))]
     [else (cons (car stream1) (mplus stream2 (cdr stream1)))]))
 
+;; bind: like map for a stream of states with a goal
 (define (bind $stream goal)
   (cond
     [(null? $stream) mzero]
+    ;; force the thunk and run again
     [(procedure? $stream) (λ () (bind ($stream) goal))]
+    ;; join the stream of states from running the goal on the first
+    ;; state in the input stream with the result of running on the
+    ;; rest of the states in the input stream
     [else (mplus (goal (car $stream))
                  (bind (cdr $stream) goal))]))
-
-;;; Example functions
-(define (fives x)
-  (disj (== x 5)
-        (λ (s/c) (λ () ((fives x) s/c)))))
-
-(define (sixes x)
-  (disj (== x 6)
-        (λ (s/c) (λ () ((sixes x) s/c)))))
-
-(define fives-and-sixes (call/fresh (λ (x) (disj (fives x) (sixes x)))))

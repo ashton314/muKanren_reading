@@ -83,6 +83,20 @@ Exactly /how/ we add the goal results together bzw. thread the state from one go
 
 Streams are lists of states with lazily-evaluated members.
 
+Here's an example from the paper showing how streams need to be interleaved and be lazy:
+
+#+begin_src racket
+  (define (fives x)
+    (disj (== x 5)
+          (λ (s/c) (λ () ((fives x) s/c)))))
+
+  (define (sixes x)
+    (disj (== x 6)
+          (λ (s/c) (λ () ((sixes x) s/c)))))
+
+  (define fives-and-sixes (call/fresh (λ (x) (disj (fives x) (sixes x)))))
+#+end_src
+
 * Extensions
 
 TODO
