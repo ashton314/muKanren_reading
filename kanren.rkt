@@ -25,8 +25,17 @@
       #f
       (if (? (caar lst)) (car lst) (assp ? (cdr lst)))))
 
+(define (occurs-check x v subst)
+  (let ([v (walk v subst)])
+    (if (var? v)
+        (var=? v x)
+        (and (pair? v) (or (occurs-check x (car v) subst)
+                           (occurs-check x (cdr v) subst))))))
+
 (define (extend-subst var val subst)
-  (cons (cons var val) subst))
+  (if (occurs-check var val subst)
+      #f
+      (cons (cons var val) subst)))
 
 ;;; Goal constructors
 
@@ -92,7 +101,7 @@
     ;; handle the case where stream1 is a lazy stream; note how we
     ;; flip the order of the streams so we interleave them
     [(procedure? stream1) (λ () (mplus stream2 (stream1)))]
-    [else (cons (car stream1) (mplus (cdr stream1) stream2))]))
+    [else (cons (car stream1) (mplus stream2 (cdr stream1)))]))
 
 ;; bind: like map for a stream of states with a goal
 (define (bind $stream goal)
