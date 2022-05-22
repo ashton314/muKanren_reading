@@ -21,3 +21,8 @@
 (define (grandparent g s)
   (fresh (p) (parent g p) (parent p s)))
 
+;; (run 20 (rel p c) (conj+ (grandparent c p) (== (cons c p) rel)))
+
+(define (fav-num n)
+  (disj (== n 42)
+        (== (cons '? even?) n)))

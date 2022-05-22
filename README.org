@@ -107,6 +107,27 @@ These are some syntactic sugar that make working with μKanren nicer. Most of th
 
 I deviated from the paper's implementation of variables and wrote them as structs instead of vectors. I think further changes could be made (e.g. not having to keep around a number in the state to generate fresh variable names but these might rely on some more language-specific features. (E.g. generating fresh strings/symbols.)
 
+** Predicates in ~unify~
+
+I've added some rudimentary predicate checking to the ~unify~ function:
+
+#+begin_src racket
+(define (fav-num n)
+  (disj (== n 42)
+        (== (cons '? even?) n)))
+#+end_src
+
+#+begin_src racket
+> (run* (n) (== n 12) (fav-num n))
+'(12)
+
+> (run* (n) (== n 13) (fav-num n))
+'()
+
+> (run* (n) (fav-num n))
+'(42 (? . #<procedure:even?>))
+#+end_src
+
 * Author
 
 I hope is /very clear/ that /I/ did /not/ write the μKanren paper. That would be Daniel P. Friedman and Jason Hemann. I merely wrote up this annotation.

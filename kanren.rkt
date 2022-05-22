@@ -68,6 +68,11 @@
        (extend-subst u v subst)]
       [(var? v)
        (extend-subst v u subst)]
+      ;; predicates
+      [(and (pair? u) (eq? (car u) '?))
+       (and ((cdr u) v) subst)]
+      [(and (pair? v) (eq? (car v) '?))
+       (and ((cdr v) u) subst)]
       ;; unify structures: walk down lists
       [(and (pair? u) (pair? v))
        (let ([subst₁ (unify (car u) (car v) subst)])
