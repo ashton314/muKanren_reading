@@ -1,6 +1,6 @@
 #lang racket/base
 
-(struct var (counter) #:transparent)
+(struct var (name) #:transparent)
 (define var=? equal?)
 
 ;;                    substitution assoc list: variable → var-or-value
@@ -103,3 +103,89 @@
     ;; rest of the states in the input stream
     [else (mplus (goal (car $stream))
                  (bind (cdr $stream) goal))]))
+
+;;; Extentions
+
+(define-syntax Zzz
+  (syntax-rules ()
+    ;; This is the inverse-η-delay abstracted in a macro
+    [(_ goal) (λ (subst/counter) (λ () (goal subst/counter)))]))
+
+(define-syntax conj+
+  (syntax-rules ()
+    [(_ g) (Zzz g)]
+    [(_ g0 gs ...) (conj (Zzz g0) (conj+ gs ...))]))
+
+(define-syntax disj+
+  (syntax-rules ()
+    [(_ g) (Zzz g)]
+    [(_ g0 gs ...) (disj (Zzz g0) (disj+ gs ...))]))
+
+(define-syntax conde
+  (syntax-rules ()
+    [(_ (g gs ...) ...) (disj+ (conj+ g gs ...) ...)]))
+
+(define-syntax fresh
+  (syntax-rules ()
+    [(_ () g gs ...) (conj+ g gs ...)]
+    [(_ (x xs ...) g gs ...)
+     (call/fresh (λ (x) (fresh (xs ...) g gs ...)))]))
+
+;;; Utilities to force streams
+(define (pull $stream)
+  (if (procedure? $stream) (pull ($stream)) $stream))
+
+(define (take n $stream)
+  (if (zero? n) '()
+      (let ([$stream (pull $stream)])
+        (cond
+          [(null? $stream) '()]
+          [else (cons (car $stream) (take (- n 1) (cdr $stream)))]))))
+
+(define (take-all $stream)
+  (let ([$stream (pull $stream)])
+    (if (null? $stream) '() (cons (car $stream) (take-all (cdr $stream))))))
+
+;;; Reification utilities
+(define (mK-reify s/c*)
+  (map reify-state/1st-var s/c*))
+
+(define (reify-state/1st-var s/c)
+  (let ([v (walk* (var 'var0) (car s/c))])
+    (walk* v (reify-s v '()))))
+
+(define (reify-s v s)
+  (let ([v (walk v s)])
+    (cond
+      [(var? v)
+       (let ([n (reify-name (var-name v))])
+         (cons (cons v n) s))]
+      [(pair? v) (reify-s (cdr v) (reify-s (car v) s))]
+      [else s])))
+
+(define (reify-name n)
+  (if (symbol? n)
+      n
+      (string->symbol (string-append "_" "." (number->string n)))))
+
+(define (walk* v s)
+  (let ([v (walk v s)])
+    (cond
+      [(var? v) v]
+      [(pair? v) (cons (walk* (car v) s)
+                       (walk* (cdr v) s))]
+      [else v])))
+
+(define (call/empty-state g) (g empty-state))
+
+(define-syntax run
+  (syntax-rules ()
+    [(_ n (xs ...) g gs ...)
+     (mK-reify (take n (call/empty-state
+                        (fresh (xs ...) g gs ...))))]))
+
+(define-syntax run*
+  (syntax-rules ()
+    [(_ (xs ...) g gs ...)
+     (mK-reify (take-all (call/empty-state
+                          (fresh (xs ...) g gs ...))))]))

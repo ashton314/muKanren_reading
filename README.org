@@ -99,7 +99,7 @@ Here's an example from the paper showing how streams need to be interleaved and 
 
 * Extensions
 
-TODO
+These are some syntactic sugar that make working with μKanren nicer. Most of them are macros, which would make porting these to other languages less straight-forward. But they do make working in Scheme/Racket a lot nicer. Some new non-Lisp languages like Elixir[fn:1] feature hygienic macro systems, so these features would be portable.
 
 * Modifications
 
@@ -120,3 +120,7 @@ Be sure to read [[http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf][t
 Other fun links:
 
  - [[https://aphyr.com/posts/354-unifying-the-technical-interview][Unifying the Technical Interview]]
+
+* Footnotes
+
+[fn:1] Personally, I think of Elixir as a Lisp in Ruby's clothing running on the BEAM. But don't tell anyone that Lisp is quietly becoming the new hot thing in web development and some machine learning. 🤫
