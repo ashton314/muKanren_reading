@@ -1,5 +1,7 @@
 #lang racket/base
 
+(provide (all-defined-out))
+
 (struct var (name) #:transparent)
 (define var=? equal?)
 
@@ -62,7 +64,7 @@
        (let ([subst₁ (unify (car u) (car v) subst)])
          (and subst₁ (unify (cdr u) (cdr v) subst₁)))]
       ;; last-ditch: are these two things equivalent?
-      [else (and (equal? u v) subst)])))
+      [else (and (eqv? u v) subst)])))
 
 ;; goal :: state → state*
 ;; call/fresh :: (var → goal) → goal
@@ -90,7 +92,7 @@
     ;; handle the case where stream1 is a lazy stream; note how we
     ;; flip the order of the streams so we interleave them
     [(procedure? stream1) (λ () (mplus stream2 (stream1)))]
-    [else (cons (car stream1) (mplus stream2 (cdr stream1)))]))
+    [else (cons (car stream1) (mplus (cdr stream1) stream2))]))
 
 ;; bind: like map for a stream of states with a goal
 (define (bind $stream goal)
@@ -122,6 +124,16 @@
     [(_ g0 gs ...) (disj (Zzz g0) (disj+ gs ...))]))
 
 (define-syntax conde
+  ;; call like
+  ;;
+  ;; (define (father p s)
+  ;;   (conde ((== p 'paul) (== s 'jason))
+  ;;          ((== p 'john) (== s 'henry))
+  ;;          ((== p 'jason) (== s 'tom))
+  ;;          ((== p 'peter) (== s 'brian))
+  ;;          ((== p 'tom) (== s 'peter))))
+  ;;
+  ;; it is `or' applied across the subgroups of goals which are joined by `and'
   (syntax-rules ()
     [(_ (g gs ...) ...) (disj+ (conj+ g gs ...) ...)]))
 
@@ -151,7 +163,7 @@
   (map reify-state/1st-var s/c*))
 
 (define (reify-state/1st-var s/c)
-  (let ([v (walk* (var 'var0) (car s/c))])
+  (let ([v (walk* (var 0) (car s/c))])
     (walk* v (reify-s v '()))))
 
 (define (reify-s v s)
