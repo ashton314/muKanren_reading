@@ -69,7 +69,19 @@ Successful unification returns the substitution list that made the two things un
 
 ** Implementing ~call/fresh~
 
-The implementation of [[file:kanren.rkt::define (call/fresh fn][call/fresh]] depends on the structure of the state.
+The implementation of [[file:kanren.rkt::define (call/fresh fn][call/fresh]] depends on the structure of the state: in a pure language, we stick a fresh variable counter on the state so we can thread that fresh effect through the computation. I would like to try just using something like ~gensym~ for variable creation.
+
+** ~AND~ and ~OR~ goal constructors
+
+The magic of the [[./kanren.rkt::define (disj goal1 goal2][disj]] and [[./kanren.rkt::define (conj goal1 goal2][conj]] functions is encapsulated in the ~mplus~ and ~bind~ functions.
+
+With the ~disj~ function, we want to ~OR~ two goals, and the ~conj~ is to ~AND~ two goals. For ~disj~, we run both goals and /add/ them together. For ~conj~, we run the first goal (seen by applying the first goal to the ~subst/counter~ variable) and then we thread the result of that to the second goal.
+
+Exactly /how/ we add the goal results together bzw. thread the state from one goal to another determines the properties of the search. I'll skip the detailed evolution of this (see the paper for a nice walk-through) but in the end we get lazily-evaluated interleaving stream handling so we can exhaust every finite stream.
+
+*** What are streams?
+
+Streams are lists of states with lazily-evaluated members.
 
 * Extensions
 

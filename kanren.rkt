@@ -70,3 +70,39 @@
   (λ (subst/counter)
     (let ([counter (cdr subst/counter)])
       ((fn (var counter)) (cons (car subst/counter) (+ counter 1))))))
+
+(define (disj goal1 goal2)
+  (λ (subst/counter)
+    (mplus (goal1 subst/counter)
+           (goal2 subst/counter))))
+
+(define (conj goal1 goal2)
+  (λ (subst/counter)
+    (bind (goal1 subst/counter)
+          goal2)))
+
+(define (mplus stream1 stream2)
+  (cond
+    [(null? stream1) stream2]
+    ;; handle the case where stream1 is a lazy stream;
+    ;; note how we flip the order of the streams so we interleave them
+    [(procedure? stream1) (λ () (mplus stream2 (stream1)))]
+    [else (cons (car stream1) (mplus stream2 (cdr stream1)))]))
+
+(define (bind $stream goal)
+  (cond
+    [(null? $stream) mzero]
+    [(procedure? $stream) (λ () (bind ($stream) goal))]
+    [else (mplus (goal (car $stream))
+                 (bind (cdr $stream) goal))]))
+
+;;; Example functions
+(define (fives x)
+  (disj (== x 5)
+        (λ (s/c) (λ () ((fives x) s/c)))))
+
+(define (sixes x)
+  (disj (== x 6)
+        (λ (s/c) (λ () ((sixes x) s/c)))))
+
+(define fives-and-sixes (call/fresh (λ (x) (disj (fives x) (sixes x)))))
