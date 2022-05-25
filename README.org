@@ -152,6 +152,17 @@ See [[./type_checking.rkt]] for an implementation of a simple type checker/infer
 '((_.5 . _.5)) ;; generic type: a -> a
 #+end_src
 
+Here's the crazy thing: you can actually ask for programs that match a given type, since relations work both ways. Here's an example of generating five programs that are of type ~number → boolean~:
+
+#+begin_src racket
+> (run 5 (prog) (type-for prog '() (cons 'number 'boolean)))
+'((lambda _.1 (? . #<procedure:boolean?>))
+  (lambda _.1 (zero? (? . #<procedure:number?>)))
+  (lambda (? . #<procedure:symbol?>) (zero? (? . #<procedure:symbol?>)))
+  (lambda _.1 (zero? (+ (? . #<procedure:number?>) (? . #<procedure:number?>))))
+  (lambda _.1 (if (? . #<procedure:boolean?>) (? . #<procedure:boolean?>) (? . #<procedure:boolean?>))))
+#+end_src
+
 * Author
 
 I hope is /very clear/ that /I/ did /not/ write the μKanren paper. That would be Daniel P. Friedman and Jason Hemann. I merely wrote up this annotation.

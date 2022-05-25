@@ -204,6 +204,8 @@
 
 (define (call/empty-state g) (g empty-state))
 
+;;; Use these to wrap your queries: run takes a number of n solutions
+;;; to the program, while run* calls `take-all'.
 (define-syntax run
   (syntax-rules ()
     [(_ n (xs ...) g gs ...)
