@@ -128,6 +128,30 @@ I've added some rudimentary predicate checking to the ~unify~ function:
 '(42 (? . #<procedure:even?>))
 #+end_src
 
+* Applications
+
+** Family tree relationships
+
+The classic example. See [[./relations_playground.rkt]]. Because of how the relations are defined, this will print out an infinite list of relations if you try to run certain queries, so best use the ~run~ function with some finite (and preferably small number; it doesn't take much to cover the whole space at least once) bound, as opposed to just running ~run*~.
+
+** Type checking
+
+See [[./type_checking.rkt]] for an implementation of a simple type checker/inference algorithm. Here is how you check the type of a program:
+
+#+begin_src racket
+> (run* (type) (type-for '((lambda x x) 2) '() type))
+'(number)
+
+> (run* (type) (type-for '((lambda x (zero? x)) 2) '() type))
+'(boolean)
+
+> (run* (type) (type-for '((lambda x (zero? x)) #f) '() type))
+'()  ;; type error
+
+> (run* (type) (type-for '(lambda x x) '() type))
+'((_.5 . _.5)) ;; generic type: a -> a
+#+end_src
+
 * Author
 
 I hope is /very clear/ that /I/ did /not/ write the μKanren paper. That would be Daniel P. Friedman and Jason Hemann. I merely wrote up this annotation.
