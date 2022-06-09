@@ -1,27 +1,4 @@
 
-# Table of Contents
-
-1.  [Synopsis](#org540b2fe)
-2.  [Description](#orgbb8b389)
-3.  [Implementing the Core](#org430a1eb)
-    1.  [Basic types](#org1e2598c)
-    2.  [The `walk` function](#org271260d)
-    3.  [Implementing `unify`](#org702c093)
-    4.  [Implementing `call/fresh`](#org750d1bf)
-    5.  [`AND` and `OR` goal constructors](#orgf0ae3e1)
-        1.  [What are streams?](#orgecdabc4)
-4.  [Extensions](#orgaff59a6)
-5.  [Modifications](#org748ba3c)
-    1.  [Variable representation](#orgd8d0317)
-    2.  [Predicates in `unify`](#org8d25af3)
-6.  [Applications](#org138a827)
-    1.  [Family tree relationships](#orgeda8329)
-    2.  [Type checking](#org2f35a96)
-7.  [Author](#org297b828)
-8.  [Further reading](#orge6a5da1)
-
-
-
 <a id="org540b2fe"></a>
 
 # Synopsis
