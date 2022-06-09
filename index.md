@@ -48,28 +48,32 @@ It *can* return another variable; if the last thing that one variable points to 
 
 The [unify](kanren.rkt) function take two *things*, `u` and `v`, and tries to make them line up according to the substitution that you give as well.
 
-    (unify '(1 2 3) '(2 3 4) '())
-    #f
-    
-    (unify '(1 2 3) '(1 2 3) '())
-    '()
-    
-    (unify '(1 2 3) '(1 2 3) '(yay))
-    '(yay)
-    
-    (unify (list 1 2 3) (list 1 (var 0) 3) '())
-    (list (cons (var 0) 2))
-    
-    (unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) 4)))
-    #f
+```racket
+(unify '(1 2 3) '(2 3 4) '())
+#f
+
+(unify '(1 2 3) '(1 2 3) '())
+'()
+
+(unify '(1 2 3) '(1 2 3) '(yay))
+'(yay)
+
+(unify (list 1 2 3) (list 1 (var 0) 3) '())
+(list (cons (var 0) 2))
+
+(unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) 4)))
+#f
+```
 
 This example illustrates how the `walk` function drills down:
 
-    (walk (var 0) `((,(var 0) . ,(var 1)) (,(var 1) . ,(var 2))))
-    (var 2)
-    
-    (unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) . ,(var 1)) (,(var 1) . 2)))
-    (list (cons (var 0) (var 1)) (cons (var 1) 2))
+```racket
+(walk (var 0) `((,(var 0) . ,(var 1)) (,(var 1) . ,(var 2))))
+(var 2)
+
+(unify (list 1 2 3) (list 1 (var 0) 3) `((,(var 0) . ,(var 1)) (,(var 1) . 2)))
+(list (cons (var 0) (var 1)) (cons (var 1) 2))
+```
 
 If we wanted to be able to unify more than just lists (e.g. rich structures) we would teach μKanren here in the `cond` how to walk those richer structures.
 
