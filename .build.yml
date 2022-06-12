@@ -1,0 +1,19 @@
+image: freebsd/13.x
+packages:
+  - hs-pandoc
+secrets:
+  - 4520e1e0-568d-40dc-af1c-0710afd432d3
+sources:
+  - https://git.sr.ht/~ashton314/microKanren
+tasks:
+  - build: |
+      cd microKanren
+      pandoc README.org -o ~/readme.html
+  - publish: |
+      set +x
+      curl -H "Content-Type: text/html"                      \
+           -H "Authorization: Bearer $(cat ~/.build-secret)"  \
+           -XPUT                                             \
+           --data-binary @readme.html                        \
+           'https://git.sr.ht/api/repos/microKanren/readme' &&
+      echo "README set"
