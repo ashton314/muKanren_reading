@@ -3,9 +3,9 @@
 #+date: 2022-05-21
 #+options: toc:t
 
-Mirrored at [[https://github.com/ashton314/muKanren_reading][ashton314 on GitHub]]
+Mirrored at [[https://github.com/ashton314/muKanren_reading][ashton314 on GitHub]].
 
-Main repository at [[https://git.sr.ht/~ashton314/microKanren][~ashton314 on SourceHut]]
+Main repository at [[https://git.sr.ht/~ashton314/microKanren][~ashton314 on SourceHut]]; issue tracker also on SourceHut [[https://todo.sr.ht/~ashton314/microKanren_issues][here]]. Mailing list for this repository [[https://lists.sr.ht/~ashton314/microKanren_updates][here]].
 
 * Synopsis
 
