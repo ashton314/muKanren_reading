@@ -31,6 +31,11 @@
 (define (grandparent g s)
   (fresh (p) (parent g p) (parent p s)))
 
+(define (cousin c1 c2)
+  (fresh (gp)
+         (grandparent c1 gp)
+         (grandparent c2 gp)))
+
 ;; (run 20 (rel p c) (conj+ (grandparent c p) (== (cons c p) rel)))
 ;; (list->set (run 10 (gp) (grandparent 'andrew gp)))
 
