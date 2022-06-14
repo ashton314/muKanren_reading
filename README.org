@@ -1,6 +1,11 @@
 #+title: Notes on μKanren
 #+author: Ashton Wiersdorf
 #+date: 2022-05-21
+#+options: toc:t
+
+Mirrored at [[https://github.com/ashton314/muKanren_reading][ashton314 on GitHub]]
+
+Main repository at [[https://git.sr.ht/~ashton314/microKanren][~ashton314 on SourceHut]]
 
 * Synopsis
 
